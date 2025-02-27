@@ -3,6 +3,7 @@ import esphome.config_validation as cv
 from esphome.components import sensor
 from esphome.const import (
     DEVICE_CLASS_FREQUENCY,
+    DEVICE_CLASS_TEMPERATURE,
     STATE_CLASS_MEASUREMENT,
     STATE_CLASS_TOTAL_INCREASING,
     UNIT_CELSIUS,

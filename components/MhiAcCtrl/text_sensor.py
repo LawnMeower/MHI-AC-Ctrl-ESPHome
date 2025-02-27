@@ -6,12 +6,13 @@ from . import MhiAcCtrl, CONF_MHI_AC_CTRL_ID
 
 CONF_PROTECTION_STATE = "protection_state"
 
-ICON_SINE = "mdi:sine-wave"
+ICON_ALERT_OUTLINE = "mdi:shield-alert-outline"
 
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(MhiAcCtrl),
     cv.GenerateID(CONF_MHI_AC_CTRL_ID): cv.use_id(MhiAcCtrl),
     cv.Optional(CONF_PROTECTION_STATE): text_sensor.text_sensor_schema(
+        icon=ICON_ALERT_OUTLINE,
     ),
 })
 

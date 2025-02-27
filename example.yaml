@@ -120,43 +120,43 @@ sensor:
   - platform: MhiAcCtrl
     mhi_ac_ctrl_id: ${mhi_device_id}
     outdoor_temperature:
-      name: "outdoor_temperature"
+      name: "Outdoor temperature"
     return_air_temperature:
-      name: "return_air_temperature"
+      name: "Return air temperature"
     outdoor_unit_fan_speed:
-      name: "outdoor_unit_fan_speed"
+      name: "Outdoor unit fan speed"
     indoor_unit_fan_speed:
-      name: "indoor_unit_fan_speed"
+      name: "Indoor unit fan speed"
     compressor_frequency:
-      name: "compressor_frequency"
+      name: "Compressor frequency"
     indoor_unit_total_run_time:
-      name: "indoor_unit_total_run_time"
+      name: "Indoor unit total run time"
     compressor_total_run_time:
-      name: "compressor_total_run_time"
+      name: "Compressor total run time"
     current_power:
-      name: "current_power"
+      name: "Current power"
     energy_used:
-      name: "energy_used"
+      name: "Energy used"
     indoor_unit_thi_r1:
-      name: "indoor_unit_thi_r1"
+      name: "Indoor (U-bend) HE temp 1"
     indoor_unit_thi_r2:
-      name: "indoor_unit_thi_r2"
+      name: "Indoor (capillary) HE temp 2"
     indoor_unit_thi_r3:
-      name: "indoor_unit_thi_r3"
+      name: "Indoor (suction header) HE temp 3"
     outdoor_unit_tho_r1:
-      name: "outdoor_unit_tho_r1"
+      name: "Outdoor HE temp"
     outdoor_unit_expansion_valve:
-      name: "outdoor_unit_expansion_valve"
+      name: "Outdoor unit exp. valve"
     outdoor_unit_discharge_pipe:
-      name: "outdoor_unit_discharge_pipe"
+      name: "Outdoor unit discharge pipe"
     outdoor_unit_discharge_pipe_super_heat:
-      name: "outdoor_unit_discharge_pipe_super_heat"
+      name: "Outdoor unit discharge pipe super heat"
     protection_state_number:
-      name: "protection_state_number"
+      name: "Compressor protection code"
     error_code:
-      name: "error_code"
+      name: "Error code"
     vanes_pos:
-      name: Vanes
+      name: "Vanes"
       id: vanes_UD_received
       on_value:
         then:
@@ -174,7 +174,7 @@ sensor:
                 id(fan_control_ud).publish_state("Swing");
               }
     vanesLR_pos:
-      name: Vanes Left Right
+      name: "Vanes Left/Right"
       id: vanes_LR_received
       on_value:
         then:
@@ -201,7 +201,7 @@ sensor:
                 id(fan_control_lr).publish_state("Swing");
               }
     threeD_auto_enabled:
-      name: 3D Auto
+      name: "3D Auto"
       id: Dauto_received
       on_value:
         then:
@@ -217,6 +217,7 @@ sensor:
               else {
                 ESP_LOGD("main", "received 3DAuto off from AC");
                 id(fan_control_3Dauto).publish_state(false);
+              }
 
 text_sensor:
   - platform: version

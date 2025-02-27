@@ -4,6 +4,7 @@ from esphome.components import sensor
 from esphome.const import (
     DEVICE_CLASS_FREQUENCY,
     DEVICE_CLASS_TEMPERATURE,
+    DEVICE_CLASS_ENERGY,
     STATE_CLASS_MEASUREMENT,
     STATE_CLASS_TOTAL_INCREASING,
     UNIT_CELSIUS,
@@ -11,6 +12,7 @@ from esphome.const import (
     UNIT_HOUR,
     UNIT_HERTZ,
     UNIT_AMPERE,
+    UNIT_KILOWATT_HOURS,
     ICON_THERMOMETER,
     ICON_FAN,
     ICON_TIMER,
@@ -42,6 +44,13 @@ CONF_VANESLR_POS_OLD = "vanesLR_pos_old"
 CONF_THREED_AUTO = "threeD_auto_enabled"
 
 ICON_SINE = "mdi:sine-wave"
+ICON_CLOCK = "mdi:clock"
+ICON_CURRENT = "mdi:current-ac"
+ICON_AIR = "mdi:air-filter"
+ICON_VALVE = "mdi:valve"
+ICON_LIGHTNING_BOLT = "mdi:lightning-bolt"
+ICON_ALERT_OUTLINE = "mdi:shield-alert-outline"
+UNIT_PULSE = "pulse"
 
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(MhiAcCtrl),
@@ -49,18 +58,18 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_ERROR_CODE): sensor.sensor_schema(
     ),
     cv.Optional(CONF_OUTDOOR_TEMPERATURE): sensor.sensor_schema(
+        icon = ICON_THERMOMETER,
         unit_of_measurement=UNIT_CELSIUS,
         accuracy_decimals=1,
         device_class=DEVICE_CLASS_TEMPERATURE,
         state_class=STATE_CLASS_MEASUREMENT,
-        icon = ICON_THERMOMETER,
     ),
     cv.Optional(CONF_RETURN_AIR_TEMPERATURE): sensor.sensor_schema(
+        icon = ICON_THERMOMETER,
         unit_of_measurement=UNIT_CELSIUS,
         accuracy_decimals=1,
         device_class=DEVICE_CLASS_TEMPERATURE,
         state_class=STATE_CLASS_MEASUREMENT,
-        icon = ICON_THERMOMETER,
     ),
     cv.Optional(CONF_OUTDOOR_UNIT_FAN_SPEED): sensor.sensor_schema(
         icon = ICON_FAN,
@@ -76,47 +85,85 @@ CONFIG_SCHEMA = cv.Schema({
         state_class=STATE_CLASS_MEASUREMENT,
     ),
     cv.Optional(CONF_INDOOR_UNIT_TOTAL_RUN_TIME): sensor.sensor_schema(
-        icon=ICON_TIMER,
+        icon=ICON_CLOCK,
         unit_of_measurement=UNIT_HOUR,
         accuracy_decimals=1,
         state_class=STATE_CLASS_TOTAL_INCREASING ,
     ),
     cv.Optional(CONF_COMPRESSOR_TOTAL_RUN_TIME): sensor.sensor_schema(
-        icon=ICON_TIMER,
+        icon=ICON_CLOCK,
         unit_of_measurement=UNIT_HOUR,
         accuracy_decimals=1,
         state_class=STATE_CLASS_TOTAL_INCREASING ,
     ),
     cv.Optional(CONF_CURRENT_POWER): sensor.sensor_schema(
+        icon=ICON_CURRENT,
         unit_of_measurement=UNIT_AMPERE,
         accuracy_decimals=2,
         state_class=STATE_CLASS_MEASUREMENT,
     ),
     cv.Optional(CONF_VANES_POS): sensor.sensor_schema(
-    ),
-    cv.Optional(CONF_VANES_POS_OLD): sensor.sensor_schema(
+        icon=ICON_AIR,
     ),
     cv.Optional(CONF_ENERGY_USED): sensor.sensor_schema(
+        icon = ICON_LIGHTNING_BOLT,
+        unit_of_measurement=UNIT_KILOWATT_HOURS,
+        accuracy_decimals=2,
+        device_class=DEVICE_CLASS_ENERGY,
+        state_class=STATE_CLASS_TOTAL_INCREASING,
     ),
     cv.Optional(CONF_INDOOR_UNIT_THI_R1): sensor.sensor_schema(
+        icon = ICON_THERMOMETER,
+        unit_of_measurement=UNIT_CELSIUS,
+        accuracy_decimals=2,
+        device_class=DEVICE_CLASS_TEMPERATURE,
+        state_class=STATE_CLASS_MEASUREMENT,
     ),
     cv.Optional(CONF_INDOOR_UNIT_THI_R2): sensor.sensor_schema(
+        icon = ICON_THERMOMETER,
+        unit_of_measurement=UNIT_CELSIUS,
+        accuracy_decimals=2,
+        device_class=DEVICE_CLASS_TEMPERATURE,
+        state_class=STATE_CLASS_MEASUREMENT,
     ),
     cv.Optional(CONF_INDOOR_UNIT_THI_R3): sensor.sensor_schema(
+        icon = ICON_THERMOMETER,
+        unit_of_measurement=UNIT_CELSIUS,
+        accuracy_decimals=2,
+        device_class=DEVICE_CLASS_TEMPERATURE,
+        state_class=STATE_CLASS_MEASUREMENT,
     ),
     cv.Optional(CONF_OUTDOOR_UNIT_THO_R1): sensor.sensor_schema(
+        icon = ICON_THERMOMETER,
+        unit_of_measurement=UNIT_CELSIUS,
+        accuracy_decimals=2,
+        device_class=DEVICE_CLASS_TEMPERATURE,
+        state_class=STATE_CLASS_MEASUREMENT,
     ),
-    cv.Optional(CONF_OUTDOOR_UNIT_EXPANSION_VALVE): sensor.sensor_schema(
+    cv.Optional(CONF_OUTDOOR_UNIT_EXPANSION_VALVE): sensor.sensor_schema(\
+        icon=ICON_VALVE,
+        unit_of_measurement=UNIT_PULSE,
+        accuracy_decimals=0,
     ),
     cv.Optional(CONF_OUTDOOR_UNIT_DISCHARGE_PIPE): sensor.sensor_schema(
+        icon = ICON_THERMOMETER,
+        unit_of_measurement=UNIT_CELSIUS,
+        accuracy_decimals=1,
+        device_class=DEVICE_CLASS_TEMPERATURE,
+        state_class=STATE_CLASS_MEASUREMENT,
     ),
     cv.Optional(CONF_OUTDOOR_UNIT_DISCHARGE_PIPE_SUPER_HEAT): sensor.sensor_schema(
+        icon = ICON_THERMOMETER,
+        unit_of_measurement=UNIT_CELSIUS,
+        accuracy_decimals=1,
+        device_class=DEVICE_CLASS_TEMPERATURE,
+        state_class=STATE_CLASS_MEASUREMENT,
     ),
     cv.Optional(CONF_PROTECTION_STATE_NUMBER): sensor.sensor_schema(
+        icon=ICON_ALERT_OUTLINE,
     ),
     cv.Optional(CONF_VANESLR_POS): sensor.sensor_schema(
-    ),
-    cv.Optional(CONF_VANESLR_POS_OLD): sensor.sensor_schema(
+        icon=ICON_AIR,
     ),
     cv.Optional(CONF_THREED_AUTO): sensor.sensor_schema(
     ),
@@ -166,10 +213,6 @@ async def to_code(config):
         conf = config[CONF_VANES_POS]
         sens = await sensor.new_sensor(conf)
         cg.add(mhi.set_vanes_pos(sens))
-    if CONF_VANES_POS_OLD in config:
-        conf = config[CONF_VANES_POS_OLD]
-        sens = await sensor.new_sensor(conf)
-        cg.add(mhi.set_vanes_pos_old(sens))
     if CONF_ENERGY_USED in config:
         conf = config[CONF_ENERGY_USED]
         sens = await sensor.new_sensor(conf)
@@ -210,10 +253,6 @@ async def to_code(config):
         conf = config[CONF_VANESLR_POS]
         sens = await sensor.new_sensor(conf)
         cg.add(mhi.set_vanesLR_pos(sens))
-    if CONF_VANESLR_POS_OLD in config:
-        conf = config[CONF_VANESLR_POS_OLD]
-        sens = await sensor.new_sensor(conf)
-        cg.add(mhi.set_vanesLR_pos_old(sens))
     if CONF_THREED_AUTO in config:
         conf = config[CONF_THREED_AUTO]
         sens = await sensor.new_sensor(conf)

@@ -6,10 +6,13 @@ from . import MhiAcCtrl, CONF_MHI_AC_CTRL_ID
 
 CONF_DEFROST = "defrost"
 
+ICON_SNOWLAKE_MELT = "mdi:snowflake-melt"
+
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(MhiAcCtrl),
     cv.GenerateID(CONF_MHI_AC_CTRL_ID): cv.use_id(MhiAcCtrl),
     cv.Optional(CONF_DEFROST): binary_sensor.binary_sensor_schema(
+        icon=ICON_SNOWLAKE_MELT
     ),
 })
 

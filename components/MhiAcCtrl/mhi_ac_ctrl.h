@@ -1,4 +1,4 @@
-// Version 3.0
+// Version 4.0a
 
 #include "MHI-AC-Ctrl-core.h"
 #include "esphome.h"
@@ -45,6 +45,32 @@ class MhiAcCtrl : public climate::Climate,
                   public Component,
                   public CallbackInterface_Status {
 public:
+    void set_error_code (Sensor* sensor) { error_code_ = sensor; }
+    void set_outdoor_temperature (Sensor* sensor) { outdoor_temperature_ = sensor; }
+    void set_return_air_temperature (Sensor* sensor) { return_air_temperature_ = sensor; }
+    void set_outdoor_unit_fan_speed (Sensor* sensor) { outdoor_unit_fan_speed_ = sensor; }
+    void set_indoor_unit_fan_speed (Sensor* sensor) { indoor_unit_fan_speed_ = sensor; }
+    void set_compressor_frequency (Sensor* sensor) { compressor_frequency_ = sensor; }
+    void set_indoor_unit_total_run_time (Sensor* sensor) { indoor_unit_total_run_time_ = sensor; }
+    void set_compressor_total_run_time (Sensor* sensor) { compressor_total_run_time_ = sensor; }
+    void set_current_power (Sensor* sensor) { current_power_ = sensor; }
+    void set_defrost (BinarySensor* sensor) { defrost_ = sensor; }
+    void set_vanes_pos (Sensor* sensor) { vanes_pos_ = sensor; }
+    void set_vanes_pos_old (Sensor* sensor) { vanes_pos_old_ = sensor; }
+    void set_energy_used (Sensor* sensor) { energy_used_ = sensor; }
+    void set_indoor_unit_thi_r1 (Sensor* sensor) { indoor_unit_thi_r1_ = sensor; }
+    void set_indoor_unit_thi_r2 (Sensor* sensor) { indoor_unit_thi_r2_ = sensor; }
+    void set_indoor_unit_thi_r3 (Sensor* sensor) { indoor_unit_thi_r3_ = sensor; }
+    void set_outdoor_unit_tho_r1 (Sensor* sensor) { outdoor_unit_tho_r1_ = sensor; }
+    void set_outdoor_unit_expansion_valve (Sensor* sensor) { outdoor_unit_expansion_valve_ = sensor; }
+    void set_outdoor_unit_discharge_pipe (Sensor* sensor) { outdoor_unit_discharge_pipe_ = sensor; }
+    void set_outdoor_unit_discharge_pipe_super_heat (Sensor* sensor) { outdoor_unit_discharge_pipe_super_heat_ = sensor; }
+    void set_protection_state_number (Sensor* sensor) { protection_state_number_ = sensor; }
+    void set_protection_state (TextSensor* sensor) { protection_state_ = sensor; }
+    void set_vanesLR_pos (Sensor* sensor) { vanesLR_pos_ = sensor; }
+    void set_vanesLR_pos_old (Sensor* sensor) { vanesLR_pos_old_ = sensor; }
+    void set_threeD_auto_enabled (Sensor* sensor) { threeD_auto_enabled_ = sensor; }
+
     void setup() override
     {
         this->power_ = power_off;
@@ -65,86 +91,18 @@ public:
         // Never send nan to HA
         if (isnan(this->target_temperature))
             this->target_temperature = 20;
-
-        error_code_.set_icon("mdi:alert-circle");
-
-        outdoor_temperature_.set_icon("mdi:thermometer");
-        outdoor_temperature_.set_unit_of_measurement("°C");
-        outdoor_temperature_.set_accuracy_decimals(2);
-
-        return_air_temperature_.set_icon("mdi:thermometer");
-        return_air_temperature_.set_unit_of_measurement("°C");
-        return_air_temperature_.set_accuracy_decimals(2);
-
-        outdoor_unit_fan_speed_.set_icon("mdi:fan");
-
-        indoor_unit_fan_speed_.set_icon("mdi:fan");
-
-        compressor_frequency_.set_icon("mdi:sine-wave");
-        compressor_frequency_.set_unit_of_measurement("Hz");
-        compressor_frequency_.set_accuracy_decimals(1);
-
-        indoor_unit_total_run_time_.set_icon("mdi:clock");
-        indoor_unit_total_run_time_.set_unit_of_measurement("h");
-
-        compressor_total_run_time_.set_icon("mdi:clock");
-        compressor_total_run_time_.set_unit_of_measurement("h");
-
-        current_power_.set_icon("mdi:current-ac");
-        current_power_.set_unit_of_measurement("A");
-        current_power_.set_accuracy_decimals(2);
-
-        defrost_.set_icon("mdi:snowflake-melt");
-
-        vanes_pos_.set_icon("mdi:air-filter");
-
-        indoor_unit_thi_r1_.set_icon("mdi:thermometer");
-        indoor_unit_thi_r1_.set_unit_of_measurement("°C");
-        indoor_unit_thi_r1_.set_accuracy_decimals(2);
-
-        indoor_unit_thi_r2_.set_icon("mdi:thermometer");
-        indoor_unit_thi_r2_.set_unit_of_measurement("°C");
-        indoor_unit_thi_r2_.set_accuracy_decimals(2);
-
-        indoor_unit_thi_r3_.set_icon("mdi:thermometer");
-        indoor_unit_thi_r3_.set_unit_of_measurement("°C");
-        indoor_unit_thi_r3_.set_accuracy_decimals(2);
-
-        outdoor_unit_tho_r1_.set_icon("mdi:thermometer");
-        outdoor_unit_tho_r1_.set_unit_of_measurement("°C");
-        outdoor_unit_tho_r1_.set_accuracy_decimals(2);
-
-        outdoor_unit_expansion_valve_.set_icon("mdi:valve");
-        outdoor_unit_expansion_valve_.set_unit_of_measurement("pulse");
-        outdoor_unit_expansion_valve_.set_accuracy_decimals(0);
-
-        outdoor_unit_discharge_pipe_.set_icon("mdi:thermometer");
-        outdoor_unit_discharge_pipe_.set_unit_of_measurement("°C");
-        outdoor_unit_discharge_pipe_.set_accuracy_decimals(1);
-
-        outdoor_unit_discharge_pipe_super_heat_.set_icon("mdi:thermometer");
-        outdoor_unit_discharge_pipe_super_heat_.set_unit_of_measurement("°C");
-        outdoor_unit_discharge_pipe_super_heat_.set_accuracy_decimals(1);
-
-        protection_state_.set_icon("mdi:shield-alert-outline");
-
-        protection_state_number_.set_icon("mdi:shield-alert-outline");
-
-        energy_used_.set_icon("mdi:lightning-bolt");
-        energy_used_.set_unit_of_measurement("kWh");
-        energy_used_.set_accuracy_decimals(2);
-        energy_used_.set_device_class("energy");
-        energy_used_.set_state_class(STATE_CLASS_TOTAL_INCREASING);
+        vanesLR_pos_old_state_ = 4;
+        vanes_pos_old_state_ = 4;
 
         mhi_ac_ctrl_core.MHIAcCtrlStatus(this);
         mhi_ac_ctrl_core.init();
         mhi_ac_ctrl_core.set_frame_size(frame_size_); // set framesize. Only 20 (legacy) or 33 (includes 3D auto and vertical vanes) possible
 
-        }
+    }
     void set_frame_size(int framesize) {
         frame_size_ = framesize;
 
-        }
+    }
     void set_room_temp_api_timeout(int time_in_seconds) {
         room_temp_api_timeout = time_in_seconds;
     }
@@ -185,9 +143,9 @@ public:
             this->publish_state();
         }
         int vanesLR_swing_value = vanesLR_swing;
-        int vanesLR_sensor_value = vanesLR_pos_.state;
+        int vanesLR_sensor_value = vanesLR_pos_state_;
         int vanesUD_swing_value = vanes_swing;
-        int vanesUD_sensor_value = vanes_pos_.state;
+        int vanesUD_sensor_value = vanes_pos_state_;
         
         switch (status) {
         case status_power:
@@ -271,7 +229,10 @@ public:
                     case vanes_3:
                     case vanes_4:
                         this->swing_mode = climate::CLIMATE_SWING_HORIZONTAL;
-                        vanes_pos_old_.publish_state(value);
+                        vanes_pos_old_state_ = value;
+                        if (vanes_pos_old_ != NULL) { 
+                            vanes_pos_old_ -> publish_state(value); 
+                        }
                         break;
                     case vanes_swing:
                         this->swing_mode = climate::CLIMATE_SWING_BOTH;
@@ -286,7 +247,10 @@ public:
                     case vanes_3:
                     case vanes_4:
                         this->swing_mode = climate::CLIMATE_SWING_OFF;
-                        vanes_pos_old_.publish_state(value);
+                        vanes_pos_old_state_ = value;
+                        if (vanes_pos_old_ != NULL) { 
+                            vanes_pos_old_ -> publish_state(value); 
+                        }
                         break;
                     case vanes_swing:
                         this->swing_mode = climate::CLIMATE_SWING_VERTICAL;
@@ -294,7 +258,10 @@ public:
                 }
 
             }
-            vanes_pos_.publish_state(value);
+            vanes_pos_state_ = value;
+            if (vanes_pos_ != NULL) { 
+                vanes_pos_ -> publish_state(value); 
+            }
             this->publish_state();
             break;
         case status_vanesLR:
@@ -308,7 +275,10 @@ public:
                     case vanesLR_6:
                     case vanesLR_7:
                         this->swing_mode = climate::CLIMATE_SWING_VERTICAL;
-                        vanesLR_pos_old_.publish_state(value);
+                        vanesLR_pos_old_state_ = value;
+                        if (vanesLR_pos_old_ != NULL) { 
+                            vanesLR_pos_old_ -> publish_state(value); 
+                        }
                         break;
                     case vanesLR_swing:
                         this->swing_mode = climate::CLIMATE_SWING_BOTH;
@@ -325,7 +295,10 @@ public:
                     case vanesLR_6:
                     case vanesLR_7:
                         this->swing_mode = climate::CLIMATE_SWING_OFF;
-                        vanesLR_pos_old_.publish_state(value);
+                        vanesLR_pos_old_state_ = value;
+                        if (vanesLR_pos_old_ != NULL) { 
+                            vanesLR_pos_old_ -> publish_state(value); 
+                        }
                         break;
                     case vanesLR_swing:
                         this->swing_mode = climate::CLIMATE_SWING_HORIZONTAL;
@@ -334,16 +307,22 @@ public:
 
             }
             this->publish_state();
-            vanesLR_pos_.publish_state(value);
+            vanesLR_pos_state_ = value;
+            if (vanesLR_pos_ != NULL) { 
+                vanesLR_pos_ -> publish_state(value); 
+            }
             break;
         case status_3Dauto:
-            switch (value) {
-            case 0b00000000:
-                Dauto_.publish_state(false);
-                break;
-            case 0b00000100:
-                Dauto_.publish_state(true);
-                break;
+            if (threeD_auto_enabled_ != NULL) { 
+
+                switch (value) {
+                case 0b00000000:
+                    threeD_auto_enabled_ -> publish_state(false); 
+                    break;
+                case 0b00000100:
+                    threeD_auto_enabled_ -> publish_state(true); 
+                    break;
+                }
             }
             this->publish_state();
             break;
@@ -363,25 +342,33 @@ public:
         case erropdata_errorcode:
             // itoa(value, strtmp, 10);
             // output_P(status, PSTR(TOPIC_ERRORCODE), strtmp);
-            error_code_.publish_state(value);
+            if (error_code_ != NULL) { 
+                error_code_ -> publish_state(value); 
+            }
             break;
         case opdata_return_air:
         case erropdata_return_air:
             // dtostrf(value * 0.25f - 15, 0, 2, strtmp);
             // output_P(status, PSTR(TOPIC_RETURNAIR), strtmp);
-            return_air_temperature_.publish_state(value * 0.25f - 15);
+            if (return_air_temperature_ != NULL) { 
+                return_air_temperature_ -> publish_state(value * 0.25f - 15); 
+            }
             break;
         case opdata_thi_r1:
             // Indoor Heat exchanger temperature 1 (U-bend)
-           indoor_unit_thi_r1_.publish_state(0.327f * value - 11.4f);
-           break;
+            if (indoor_unit_thi_r1_ != NULL) { 
+                indoor_unit_thi_r1_ -> publish_state(0.327f * value - 11.4f); 
+            }
+            break;
         case erropdata_thi_r1:
             // itoa(0.327f * value - 11.4f, strtmp, 10); // only rough approximation
             // output_P(status, PSTR(TOPIC_THI_R1), strtmp);
             break;
         case opdata_thi_r2:
             // Indoor Heat exchanger temperature 2 (capillary)
-            indoor_unit_thi_r2_.publish_state(0.327f * value - 11.4f);
+            if (indoor_unit_thi_r2_ != NULL) { 
+                indoor_unit_thi_r2_ -> publish_state(0.327f * value - 11.4f); 
+            }
             break;
         case erropdata_thi_r2:
             // itoa(0.327f * value - 11.4f, strtmp, 10); // formula for calculation not known
@@ -389,7 +376,9 @@ public:
             break;
         case opdata_thi_r3:
             // Indoor Heat exchanger temperature 3 (suction header)
-            indoor_unit_thi_r3_.publish_state(0.327f * value - 11.4f);
+            if (indoor_unit_thi_r3_ != NULL) { 
+                indoor_unit_thi_r3_ -> publish_state(0.327f * value - 11.4f); 
+            }
             break;
         case erropdata_thi_r3:
             // itoa(0.327f * value - 11.4f, strtmp, 10); // only rough approximation
@@ -399,23 +388,31 @@ public:
         case erropdata_iu_fanspeed:
             // itoa(value, strtmp, 10);
             // output_P(status, PSTR(TOPIC_IU_FANSPEED), strtmp);
-            indoor_unit_fan_speed_.publish_state(value);
+            if (indoor_unit_fan_speed_ != NULL) { 
+                indoor_unit_fan_speed_ -> publish_state(value); 
+            }
             break;
         case opdata_total_iu_run:
         case erropdata_total_iu_run:
             // itoa(value * 100, strtmp, 10);
             // output_P(status, PSTR(TOPIC_TOTAL_IU_RUN), strtmp);
-            indoor_unit_total_run_time_.publish_state(value * 100);
+            if (indoor_unit_total_run_time_ != NULL) { 
+                indoor_unit_total_run_time_ -> publish_state(value * 100); 
+            }
             break;
         case erropdata_outdoor:
         case opdata_outdoor:
             // dtostrf((value - 94) * 0.25f, 0, 2, strtmp);
             // output_P(status, PSTR(TOPIC_OUTDOOR), strtmp);
-            outdoor_temperature_.publish_state((value - 94) * 0.25f);
+            if (outdoor_temperature_ != NULL) { 
+                outdoor_temperature_ -> publish_state((value - 94) * 0.25f); 
+            }
             break;
         case opdata_tho_r1:
             // Indoor Heat exchanger temperature 3 (suction header)
-            outdoor_unit_tho_r1_.publish_state(0.327f * value - 11.4f);
+            if (outdoor_unit_tho_r1_ != NULL) { 
+                outdoor_unit_tho_r1_ -> publish_state(0.327f * value - 11.4f); 
+            }
             break;
         case erropdata_tho_r1:
             // itoa(0.327f * value - 11.4f, strtmp, 10); // formula for calculation not known
@@ -426,30 +423,46 @@ public:
             // dtostrf(
             //    highByte(value) * 25.6f + 0.1f * lowByte(value), 0, 2, strtmp); // to be confirmed
             // output_P(status, PSTR(TOPIC_COMP), strtmp);
-            compressor_frequency_.publish_state(highByte(value) * 25.6f + 0.1f * lowByte(value));
+            if (compressor_frequency_ != NULL) { 
+                compressor_frequency_ -> publish_state(highByte(value) * 25.6f + 0.1f * lowByte(value)); 
+            }
             break;
         case erropdata_td:
         case opdata_td:
-            if (value < 0x2)
-                outdoor_unit_discharge_pipe_.publish_state(30);
-            else
-                outdoor_unit_discharge_pipe_.publish_state(value / 2 + 32);
+            if (value < 0x2) {
+                if (outdoor_unit_discharge_pipe_ != NULL) { 
+                    outdoor_unit_discharge_pipe_ -> publish_state(30); 
+                }
+            }
+            else {
+                if (outdoor_unit_discharge_pipe_ != NULL) { 
+                    outdoor_unit_discharge_pipe_ -> publish_state(value / 2 + 32); 
+                }
+            }
             break;
         case opdata_ct:
         case erropdata_ct:
             // dtostrf(value * 14 / 51.0f, 0, 2, strtmp);
             // output_P(status, PSTR(TOPIC_CT), strtmp);
-            current_power_.publish_state(value * 14 / 51.0f);
+            if (current_power_ != NULL) { 
+                current_power_ -> publish_state(value * 14 / 51.0f); 
+            }
             break;
         case opdata_tdsh:
-            outdoor_unit_discharge_pipe_super_heat_.publish_state(value);
+            if (outdoor_unit_discharge_pipe_super_heat_ != NULL) { 
+                outdoor_unit_discharge_pipe_super_heat_ -> publish_state(value); 
+            }
             // itoa(value, strtmp, 10); // formula for calculation not known
             // output_P(status, PSTR(TOPIC_TDSH), strtmp);
             break;
         case opdata_protection_no:
             if (value < protection_states.size())
-                protection_state_.publish_state(protection_states[value]);
-            protection_state_number_.publish_state(value);
+                if (protection_state_ != NULL) { 
+                    protection_state_ -> publish_state(protection_states[value]); 
+                }
+            if (protection_state_number_ != NULL) { 
+                protection_state_number_ -> publish_state(value); 
+            }
             // itoa(value, strtmp, 10);
             // output_P(status, PSTR(TOPIC_PROTECTION_NO), strtmp);
             break;
@@ -457,23 +470,31 @@ public:
         case erropdata_ou_fanspeed:
             // itoa(value, strtmp, 10);
             // output_P(status, PSTR(TOPIC_OU_FANSPEED), strtmp);
-            outdoor_unit_fan_speed_.publish_state(value);
+            if (outdoor_unit_fan_speed_ != NULL) { 
+                outdoor_unit_fan_speed_ -> publish_state(value); 
+            }
             break;
         case opdata_defrost:
             // if (value)
             //     output_P(status, PSTR(TOPIC_DEFROST), PSTR(PAYLOAD_OP_DEFROST_ON));
             // else
             //     output_P(status, PSTR(TOPIC_DEFROST), PSTR(PAYLOAD_OP_DEFROST_OFF));
-            defrost_.publish_state(value != 0);
+            if (defrost_ != NULL) { 
+                defrost_ -> publish_state(value != 0); 
+            }
             break;
         case opdata_total_comp_run:
         case erropdata_total_comp_run:
             // itoa(value * 100, strtmp, 10);
             // output_P(status, PSTR(TOPIC_TOTAL_COMP_RUN), strtmp);
-            compressor_total_run_time_.publish_state(value * 100);
+            if (compressor_total_run_time_ != NULL) { 
+                compressor_total_run_time_ -> publish_state(value * 100); 
+            }
             break;
         case opdata_ou_eev1:
-            outdoor_unit_expansion_valve_.publish_state(value);
+            if (outdoor_unit_expansion_valve_ != NULL) { 
+                outdoor_unit_expansion_valve_ -> publish_state(value); 
+            }
             break;
         case erropdata_ou_eev1:
             // itoa(value, strtmp, 10);
@@ -485,46 +506,14 @@ public:
         case opdata_kwh:
             // https://github.com/absalom-muc/MHI-AC-Ctrl/pull/135
             // This item is counting the kWh from the point where the AC is powered On
-            energy_used_.publish_state(value * 0.25);
+            if (energy_used_ != NULL) { 
+                energy_used_ -> publish_state(value * 0.25); 
+            }
             break;
         case opdata_unknown:
             // skip these values as they are not used currently
             break;
         }
-    }
-
-    std::vector<Sensor *> get_sensors() {
-        return {
-            &error_code_,
-            &outdoor_temperature_,
-            &return_air_temperature_,
-            &outdoor_unit_fan_speed_,
-            &indoor_unit_fan_speed_,
-            &current_power_,
-            &compressor_frequency_,
-            &indoor_unit_total_run_time_,
-            &compressor_total_run_time_,
-            &vanes_pos_,
-            &energy_used_,
-            &indoor_unit_thi_r1_,
-            &indoor_unit_thi_r2_,
-            &indoor_unit_thi_r3_,
-            &outdoor_unit_tho_r1_,
-            &outdoor_unit_expansion_valve_,
-            &outdoor_unit_discharge_pipe_,
-            &outdoor_unit_discharge_pipe_super_heat_,
-            &protection_state_number_,
-            &vanesLR_pos_,
-            &Dauto_,
-        };
-    }
-
-    std::vector<TextSensor *> get_text_sensors() {
-        return { &protection_state_ };
-    }
-
-    std::vector<BinarySensor *> get_binary_sensors() {
-        return { &defrost_ };
     }
 
     void set_room_temperature(float value) {
@@ -633,10 +622,8 @@ protected:
 
         if (call.get_swing_mode().has_value()) {
             this->swing_mode = *call.get_swing_mode();
-            int vanesLR_pos_old_value = vanesLR_pos_old_.has_state() ? vanesLR_pos_old_.state : 4;
-            int vanes_pos_old_value = vanes_pos_old_.has_state() ? vanes_pos_old_.state : 4;
-            vanesLR_ = static_cast<ACVanesLR>(vanesLR_pos_old_value);
-            vanes_ = static_cast<ACVanes>(vanes_pos_old_value);
+            vanesLR_ = static_cast<ACVanesLR>(vanesLR_pos_old_state_);
+            vanes_ = static_cast<ACVanes>(vanes_pos_old_state_);
 
             switch (this->swing_mode) {
             case climate::CLIMATE_SWING_OFF:
@@ -686,32 +673,37 @@ protected:
     uint fan_;
     ACVanes vanes_;
     ACVanesLR vanesLR_;
+    int vanesLR_pos_old_state_;
+    int vanesLR_pos_state_;
+    int vanes_pos_old_state_;
+    int vanes_pos_state_;
 
     MHI_AC_Ctrl_Core mhi_ac_ctrl_core;
 
-    Sensor error_code_;
-    Sensor outdoor_temperature_;
-    Sensor return_air_temperature_;
-    Sensor outdoor_unit_fan_speed_;
-    Sensor indoor_unit_fan_speed_;
-    Sensor compressor_frequency_;
-    Sensor indoor_unit_total_run_time_;
-    Sensor compressor_total_run_time_;
-    Sensor current_power_;
-    BinarySensor defrost_;
-    Sensor vanes_pos_;
-    Sensor vanes_pos_old_;
-    Sensor energy_used_;
-    Sensor indoor_unit_thi_r1_;
-    Sensor indoor_unit_thi_r2_;
-    Sensor indoor_unit_thi_r3_;
-    Sensor outdoor_unit_tho_r1_;
-    Sensor outdoor_unit_expansion_valve_;
-    Sensor outdoor_unit_discharge_pipe_;
-    Sensor outdoor_unit_discharge_pipe_super_heat_;
-    Sensor protection_state_number_;
-    TextSensor protection_state_;
-    Sensor vanesLR_pos_;
-    Sensor vanesLR_pos_old_;
-    Sensor Dauto_;
+    Sensor* error_code_;
+    Sensor* outdoor_temperature_;
+    Sensor* return_air_temperature_;
+    Sensor* outdoor_unit_fan_speed_;
+    Sensor* indoor_unit_fan_speed_;
+    Sensor* compressor_frequency_;
+    Sensor* indoor_unit_total_run_time_;
+    Sensor* compressor_total_run_time_;
+    Sensor* current_power_;
+    BinarySensor* defrost_;
+    Sensor* vanes_pos_;
+    Sensor* vanes_pos_old_;
+    Sensor* energy_used_;
+    Sensor* indoor_unit_thi_r1_;
+    Sensor* indoor_unit_thi_r2_;
+    Sensor* indoor_unit_thi_r3_;
+    Sensor* outdoor_unit_tho_r1_;
+    Sensor* outdoor_unit_expansion_valve_;
+    Sensor* outdoor_unit_discharge_pipe_;
+    Sensor* outdoor_unit_discharge_pipe_super_heat_;
+    Sensor* protection_state_number_;
+    TextSensor* protection_state_;
+    Sensor* vanesLR_pos_;
+    Sensor* vanesLR_pos_old_;
+    Sensor* threeD_auto_enabled_;
+
 };

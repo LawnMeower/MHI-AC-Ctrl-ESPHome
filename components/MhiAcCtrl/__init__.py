@@ -28,4 +28,3 @@ async def to_code(config):
     cg.add(var.set_room_temp_api_timeout(config[CONF_ROOM_TEMP_TIMEOUT]))
     cg.add(var.set_vanes(config[CONF_VANES_UD]))
     cg.add(var.set_vanesLR(config[CONF_VANES_LR]))
-    cg.add(var.get_binary_sensors())

@@ -1,3 +1,6 @@
+# THIS FORK IS IN DEV MODE! See [original repo](https://github.com/ginkage/MHI-AC-Ctrl-ESPHome)
+
+
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/ginkage)
 [![paypal RobertJansen1](https://www.paypalobjects.com/en_GB/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=TL3SFZ4P6ZDHN)
 

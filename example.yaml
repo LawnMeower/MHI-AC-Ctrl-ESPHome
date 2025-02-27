@@ -31,7 +31,7 @@ wifi:
 
 captive_portal:
     
-# Version 3.0
+# Version 4.0a
 
 substitutions:
   # Unique device ID in HA
@@ -101,12 +101,10 @@ climate:
     name: "${devicename}"
 
 binary_sensor:
-  - platform: custom
-    lambda: |-
-      return ((MhiAcCtrl*)id(${deviceid}))->get_binary_sensors();
-
-    binary_sensors:
-      - name: Defrost
+  - platform: MhiAcCtrl
+    mhi_ac_ctrl_id: ${mhi_device_id}
+    defrost: 
+      name: "Defrost"
 
 sensor:
   - platform: template
@@ -119,92 +117,106 @@ sensor:
   - platform: wifi_signal
     name: WiFi Signal
     update_interval: 60s
-  - platform: custom
-    lambda: |-
-      return ((MhiAcCtrl*)id(${deviceid}))->get_sensors();
-
-    # Sensor names in HA, you can change these if you want
-    # Don't delete them or change their position in the list
-    sensors:
-      - name: Error code
-      - name: Outdoor temperature
-      - name: Return air temperature
-      - name: Outdoor unit fan speed
-      - name: Indoor unit fan speed
-      - name: Current power
-      - name: Compressor frequency
-      - name: Indoor unit total run time
-      - name: Compressor total run time
-      - name: Vanes
-        id: vanes_UD_received
-        on_value:
-          then:
-            - lambda: |-
-                float received_value = id(vanes_UD_received).state;
-                if (received_value == 1.0) {
-                  id(fan_control_ud).publish_state("Up");
-                } else if (received_value == 2.0) {
-                  id(fan_control_ud).publish_state("Up/Center");
-                } else if (received_value == 3.0) {
-                  id(fan_control_ud).publish_state("Center/Down");
-                } else if (received_value == 4.0) {
-                  id(fan_control_ud).publish_state("Down");
-                } else if (received_value == 5.0) {
-                  id(fan_control_ud).publish_state("Swing");
-                }
-
-      - name: Energy used
-      - name: Indoor (U-bend) HE temp 1
-      - name: Indoor (capillary) HE temp 2
-      - name: Indoor (suction header) HE temp 3
-      - name: Outdoor HE temp
-      - name: Outdoor unit exp. valve
-      - name: Outdoor unit discharge pipe
-      - name: Outdoor unit discharge pipe super heat
-      - name: Compressor protection code
-      - name: Vanes Left Right
-        id: vanes_LR_received
-        on_value:
-          then:
-            - lambda: |-
-                if (id(frame_size_sensor).state != 33) {
-                  return;
-                }
-                float received_value = id(vanes_LR_received).state;
-                if (received_value == 1.0) {
-                  id(fan_control_lr).publish_state("Left");
-                } else if (received_value == 2.0) {
-                  id(fan_control_lr).publish_state("Left/Center");
-                } else if (received_value == 3.0) {
-                  id(fan_control_lr).publish_state("Center");
-                } else if (received_value == 4.0) {
-                  id(fan_control_lr).publish_state("Center/Right");
-                } else if (received_value == 5.0) {
-                  id(fan_control_lr).publish_state("Right");
-                } else if (received_value == 6.0) {
-                  id(fan_control_lr).publish_state("Wide");
-                } else if (received_value == 7.0) {
-                  id(fan_control_lr).publish_state("Spot");
-                } else if (received_value == 8.0) {
-                  id(fan_control_lr).publish_state("Swing");
-                }
-      - name: 3D Auto
-        id: Dauto_received
-        on_value:
-          then:
-            - lambda: |-
-                if (id(frame_size_sensor).state != 33) {
-                  return;
-                }
-                bool received_value = id(Dauto_received).state;
-                if (received_value) {
-                  ESP_LOGD("main", "received 3DAuto from AC");
-                  id(fan_control_3Dauto).publish_state(true);
-                }
-                else {
-                  ESP_LOGD("main", "received 3DAuto off from AC");
-                  id(fan_control_3Dauto).publish_state(false);
-                }
+  - platform: MhiAcCtrl
+    mhi_ac_ctrl_id: ${mhi_device_id}
+    outdoor_temperature:
+      name: "outdoor_temperature"
+    return_air_temperature:
+      name: "return_air_temperature"
+    outdoor_unit_fan_speed:
+      name: "outdoor_unit_fan_speed"
+    indoor_unit_fan_speed:
+      name: "indoor_unit_fan_speed"
+    compressor_frequency:
+      name: "compressor_frequency"
+    indoor_unit_total_run_time:
+      name: "indoor_unit_total_run_time"
+    compressor_total_run_time:
+      name: "compressor_total_run_time"
+    current_power:
+      name: "current_power"
+    energy_used:
+      name: "energy_used"
+    indoor_unit_thi_r1:
+      name: "indoor_unit_thi_r1"
+    indoor_unit_thi_r2:
+      name: "indoor_unit_thi_r2"
+    indoor_unit_thi_r3:
+      name: "indoor_unit_thi_r3"
+    outdoor_unit_tho_r1:
+      name: "outdoor_unit_tho_r1"
+    outdoor_unit_expansion_valve:
+      name: "outdoor_unit_expansion_valve"
+    outdoor_unit_discharge_pipe:
+      name: "outdoor_unit_discharge_pipe"
+    outdoor_unit_discharge_pipe_super_heat:
+      name: "outdoor_unit_discharge_pipe_super_heat"
+    protection_state_number:
+      name: "protection_state_number"
+    error_code:
+      name: "error_code"
+    vanes_pos:
+      name: Vanes
+      id: vanes_UD_received
+      on_value:
+        then:
+          - lambda: |-
+              float received_value = id(vanes_UD_received).state;
+              if (received_value == 1.0) {
+                id(fan_control_ud).publish_state("Up");
+              } else if (received_value == 2.0) {
+                id(fan_control_ud).publish_state("Up/Center");
+              } else if (received_value == 3.0) {
+                id(fan_control_ud).publish_state("Center/Down");
+              } else if (received_value == 4.0) {
+                id(fan_control_ud).publish_state("Down");
+              } else if (received_value == 5.0) {
+                id(fan_control_ud).publish_state("Swing");
+              }
+    vanesLR_pos:
+      name: Vanes Left Right
+      id: vanes_LR_received
+      on_value:
+        then:
+          - lambda: |-
+              if (id(frame_size_sensor).state != 33) {
+                return;
+              }
+              float received_value = id(vanes_LR_received).state;
+              if (received_value == 1.0) {
+                id(fan_control_lr).publish_state("Left");
+              } else if (received_value == 2.0) {
+                id(fan_control_lr).publish_state("Left/Center");
+              } else if (received_value == 3.0) {
+                id(fan_control_lr).publish_state("Center");
+              } else if (received_value == 4.0) {
+                id(fan_control_lr).publish_state("Center/Right");
+              } else if (received_value == 5.0) {
+                id(fan_control_lr).publish_state("Right");
+              } else if (received_value == 6.0) {
+                id(fan_control_lr).publish_state("Wide");
+              } else if (received_value == 7.0) {
+                id(fan_control_lr).publish_state("Spot");
+              } else if (received_value == 8.0) {
+                id(fan_control_lr).publish_state("Swing");
+              }
+    threeD_auto_enabled:
+      name: 3D Auto
+      id: Dauto_received
+      on_value:
+        then:
+          - lambda: |-
+              if (id(frame_size_sensor).state != 33) {
+                return;
+              }
+              bool received_value = id(Dauto_received).state;
+              if (received_value) {
+                ESP_LOGD("main", "received 3DAuto from AC");
+                id(fan_control_3Dauto).publish_state(true);
+              }
+              else {
+                ESP_LOGD("main", "received 3DAuto off from AC");
+                id(fan_control_3Dauto).publish_state(false);
 
 text_sensor:
   - platform: version
@@ -216,11 +228,10 @@ text_sensor:
       name: SSID
     bssid:
       name: BSSID
-  - platform: custom
-    lambda: |-
-      return ((MhiAcCtrl*)id(${deviceid}))->get_text_sensors();
-    text_sensors:
-      - name: Compressor protection status
+  - platform: MhiAcCtrl
+    mhi_ac_ctrl_id: ${mhi_device_id}
+    protection_state: 
+      name: "Compressor protection status"
 
 select:
   - platform: template

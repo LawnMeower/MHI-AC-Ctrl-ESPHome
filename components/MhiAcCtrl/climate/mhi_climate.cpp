@@ -247,7 +247,7 @@ void MhiClimate::control(const climate::ClimateCall& call) {
     if (call.get_target_temperature().has_value()) {
         this->target_temperature = *call.get_target_temperature();
 
-        ESP_LOGE(TAG, "TEMP: Set %f", this->target_temperature);
+        ESP_LOGD(TAG, "Target temperature Set %f", this->target_temperature);
 
         this->tsetpoint_ = clamp(this->target_temperature, minimum_temperature_, maximum_temperature_);
 
